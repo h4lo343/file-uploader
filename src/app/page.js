@@ -8,8 +8,8 @@ import {
   TableRow,
 } from "@/components/shadcnUI/table";
 import supabase from "@/lib/supabase";
-export const fetchCache = "force-no-store";
 
+export const fetchCache = "force-no-store";
 export async function getContactorsData() {
   const { data: contactors } = await supabase.from("customers").select();
 
