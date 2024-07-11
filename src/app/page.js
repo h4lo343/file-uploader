@@ -9,7 +9,7 @@ import {
 } from "@/components/shadcnUI/table";
 import supabase from "@/lib/supabase";
 
-export const fetchCache = "force-no-store";
+export const revalidate = 0;
 export async function getContactorsData() {
   const { data: contactors } = await supabase.from("customers").select();
 
