@@ -7,6 +7,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/shadcnUI/table";
+import validator from "validator";
 import {
   Form,
   FormControl,
@@ -47,24 +48,38 @@ import {
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
+import supabase from "@/lib/supabase";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
 
 const columns = [
   { accessorKey: "First Name", header: "First Name" },
   { accessorKey: "Last Name", header: "Last Name" },
   { accessorKey: "Email", header: "Email" },
   { accessorKey: "Mobile", header: "Mobile" },
-  { accessorKey: "Custom Fields", header: "Custom Fields" },
+  { accessorKey: "Custom Field", header: "Custom Field" },
+  { accessorKey: "State", header: "State" },
 ];
 const formSchema = z.object({
-  firstName: z.string().min(2, {
-    message: "Username must be at least 2 characters.",
+  "First Name": z.string().min(1, {
+    message: "Please fill your first name",
   }),
-  lastName: z.string().min(2, {
-    message: "Username must be at least 2 characters.",
+  "Last Name": z.string().min(1, {
+    message: "Please fill your last name",
   }),
+  Email: z.string().email({ message: "Must be a valid email address" }),
+  Mobile: z.string().refine(validator.isMobilePhone, {
+    message: "Must be a valid phone number",
+  }),
+  State: z.string().min(1, {
+    message: "Please select your state",
+  }),
+  "Custom Field": z.string().optional(),
 });
 
 export const ContactorTable = ({ contactorsData }) => {
+  const router = useRouter();
+  const [dialogOpen, setDialogOpen] = useState(false);
   const table = useReactTable({
     data: contactorsData,
     columns,
@@ -73,18 +88,22 @@ export const ContactorTable = ({ contactorsData }) => {
   const form = useForm({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      firstName: "",
-      lastName: "",
-      email: "",
-      mobile: "",
+      "First Name": "",
+      "Last Name": "",
+      Email: "",
+      Mobile: "",
+      "Custom Field": "",
+      State: "",
     },
   });
-  const addNewContact = (v) => {
-    console.log(v);
+  const addNewContact = async (v) => {
+    const { data, error } = await supabase.from("customers").insert([{ ...v }]);
+    router.refresh();
+    setDialogOpen(false);
   };
   return (
     <div>
-      <Dialog>
+      <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogTrigger asChild>
           <Button className="mb-8">Add New Contact</Button>
         </DialogTrigger>
@@ -99,7 +118,7 @@ export const ContactorTable = ({ contactorsData }) => {
             >
               <FormField
                 control={form.control}
-                name="firstName"
+                name="First Name"
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>First Name</FormLabel>
@@ -110,12 +129,13 @@ export const ContactorTable = ({ contactorsData }) => {
                         {...field}
                       />
                     </FormControl>
+                    <FormMessage />
                   </FormItem>
                 )}
               />
               <FormField
                 control={form.control}
-                name="lastName"
+                name="Last Name"
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Last Name</FormLabel>
@@ -126,68 +146,87 @@ export const ContactorTable = ({ contactorsData }) => {
                         {...field}
                       />
                     </FormControl>
+                    <FormMessage />
                   </FormItem>
                 )}
               />
               <FormField
                 control={form.control}
-                name="email"
+                name="Email"
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Email</FormLabel>
                     <FormControl>
                       <Input id="Email" placeholder="Email" {...field} />
                     </FormControl>
+                    <FormMessage />
                   </FormItem>
                 )}
               />
               <FormField
                 control={form.control}
-                name="mobile"
+                name="Mobile"
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Mobile</FormLabel>
                     <FormControl>
                       <Input id="Mobile" placeholder="Mobile" {...field} />
                     </FormControl>
+                    <FormMessage />
                   </FormItem>
                 )}
               />
-              {/* <FormField
+              <FormField
                 control={form.control}
                 name="State"
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>State</FormLabel>
-                    <FormControl>
-                      <Select {...field}>
-                        <SelectTrigger className="w-[180px]">
-                          <SelectValue placeholder="Chose Your State" />
+                    <Select
+                      onValueChange={field.onChange}
+                      defaultValue={field.value}
+                    >
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="State" />
                         </SelectTrigger>
-                        <SelectContent>
-                          <SelectGroup>
-                            <SelectLabel>States</SelectLabel>
-                            <SelectItem value="Queensland">
-                              Queensland
-                            </SelectItem>
-                            <SelectItem value="Tasmania">Tasmania</SelectItem>
-                            <SelectItem value="New South Wales">
-                              New South Wales
-                            </SelectItem>
-                            <SelectItem value="Victoria ">Victoria </SelectItem>
-                            <SelectItem value="Western Australia">
-                              Western Australia
-                            </SelectItem>
-                            <SelectItem value="South Australia">
-                              South Australia
-                            </SelectItem>
-                          </SelectGroup>
-                        </SelectContent>
-                      </Select>
-                    </FormControl>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="Queensland">Queensland</SelectItem>
+                        <SelectItem value="Tasmania">Tasmania</SelectItem>
+                        <SelectItem value="New South Wales">
+                          New South Wales
+                        </SelectItem>
+                        <SelectItem value="Victoria ">Victoria </SelectItem>
+                        <SelectItem value="Western Australia">
+                          Western Australia
+                        </SelectItem>
+                        <SelectItem value="South Australia">
+                          South Australia
+                        </SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
                   </FormItem>
                 )}
-              /> */}
+              />
+              <FormField
+                control={form.control}
+                name="Custom Field"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Custom Field</FormLabel>
+                    <FormControl>
+                      <Input
+                        id="customField"
+                        placeholder="Custom Field"
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
               <Button type="submit">Save changes</Button>
             </form>
           </Form>
