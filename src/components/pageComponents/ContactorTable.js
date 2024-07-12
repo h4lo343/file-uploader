@@ -11,7 +11,7 @@ import { cn } from "@/lib/utils";
 import { Paperclip, Send } from "lucide-react";
 import { buttonVariants } from "@/components/shadcnUI/button";
 import validator from "validator";
-import { addNewContact } from "@/app/utils/serverActions/addNewContact";
+import { addNewContact } from "@/lib/serverActions/addNewContact";
 import {
   Form,
   FormControl,
@@ -51,7 +51,7 @@ import {
 } from "@/components/shadcnUI/select";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
-import { z } from "zod";
+import { object, z } from "zod";
 import supabase from "@/lib/supabase";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -61,6 +61,7 @@ import {
   FileUploaderItem,
   FileInput,
 } from "@/components/shadcnUI/fileUpload";
+import { uploadFile } from "@/lib/serverActions/uploadFile";
 
 const columns = [
   { accessorKey: "First Name", header: "First Name" },
@@ -101,12 +102,14 @@ const dropZoneConfig = {
     "text/*": [".csv"],
   },
   multiple: true,
+  maxSize: 1024 * 1024 * 49,
   maxFiles: 1,
 };
 export const ContactorTable = ({ contactorsData }) => {
   const router = useRouter();
   const [isForm, setIsForm] = useState(true);
   const handleAddNewContact = async (v) => {
+    console.log(FileForm.getValues("File"));
     await addNewContact(v);
     router.refresh();
     setDialogOpen(false);
@@ -135,7 +138,13 @@ export const ContactorTable = ({ contactorsData }) => {
       File: [],
     },
   });
-  const test = (v) => console.log(v);
+  const handleUploadFile = async (v) => {
+    console.log(v.File[0] instanceof File);
+    const formData = new FormData();
+
+    formData.append("file", v.File[0]);
+    await uploadFile(formData);
+  };
   const FileSvgDraw = () => {
     return (
       <>
@@ -312,38 +321,37 @@ export const ContactorTable = ({ contactorsData }) => {
           ) : (
             <>
               <Form {...FileForm}>
-                <form onSubmit={FileForm.handleSubmit(test)}>
+                <form onSubmit={FileForm.handleSubmit(handleUploadFile)}>
                   <FormField
                     control={FileForm.control}
                     name="File"
                     render={({ field }) => (
                       <FormItem>
-                        <FormControl>
-                          <FileUploader
-                            value={field.value}
-                            onValueChange={field.onChange}
-                            dropzoneOptions={dropZoneConfig}
-                            reSelect={true}
-                            className="relative bg-background rounded-lg p-2 w-full"
-                          >
-                            <FileInput className=" outline-dashed outline-1 outline-white">
-                              <div className="flex items-center justify-center flex-col pt-3 pb-4 w-full ">
-                                <FileSvgDraw />
-                              </div>
-                            </FileInput>
+                        <FileUploader
+                          value={field.value}
+                          onValueChange={field.onChange}
+                          dropzoneOptions={dropZoneConfig}
+                          reSelect={true}
+                          className="relative bg-background rounded-lg p-2 w-full"
+                        >
+                          <FileInput className=" outline-dashed outline-1 outline-white">
+                            <div className="flex items-center justify-center flex-col pt-3 pb-4 w-full ">
+                              <FileSvgDraw />
+                            </div>
+                          </FileInput>
 
-                            <FileUploaderContent>
-                              {field.value?.map((file, i) => {
-                                return (
-                                  <FileUploaderItem key={i} index={i}>
-                                    <Paperclip className="h-4 w-4 stroke-current" />
-                                    <span>{file.name}</span>
-                                  </FileUploaderItem>
-                                );
-                              })}
-                            </FileUploaderContent>
-                          </FileUploader>
-                        </FormControl>
+                          <FileUploaderContent>
+                            {field.value?.map((file, i) => {
+                              return (
+                                <FileUploaderItem key={i} index={i}>
+                                  <Paperclip className="h-4 w-4 stroke-current" />
+                                  <span>{file.name}</span>
+                                </FileUploaderItem>
+                              );
+                            })}
+                          </FileUploaderContent>
+                        </FileUploader>
+
                         <FormMessage />
                       </FormItem>
                     )}
