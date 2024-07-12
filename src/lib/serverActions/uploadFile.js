@@ -12,15 +12,14 @@ export async function uploadFile(formData) {
   const stream = Readable.from(buffer);
 
   const result = [];
-  stream
-    .pipe(csvParser())
-    .on("data", (data) => {
-      result.push(data);
-    })
-    .on("end", () => {
-      console.log(result);
-    });
+  stream.pipe(csvParser()).on("data", (data) => {
+    result.push(data);
+  });
+
   await writeFile("./a.csv", buffer);
   const { data, error } = await supabase.from("customers").insert(result);
-  return;
+  if (error) {
+    return { error: "Format not correct" };
+  }
+  return { success: true };
 }

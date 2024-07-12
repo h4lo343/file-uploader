@@ -143,7 +143,11 @@ export const ContactorTable = ({ contactorsData }) => {
     const formData = new FormData();
 
     formData.append("file", v.File[0]);
-    await uploadFile(formData);
+    const res = await uploadFile(formData);
+    if (res.success) {
+      router.refresh();
+      setDialogOpen(false);
+    }
   };
   const FileSvgDraw = () => {
     return (
