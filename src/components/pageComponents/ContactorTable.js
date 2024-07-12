@@ -60,7 +60,7 @@ import {
   FileUploaderContent,
   FileUploaderItem,
   FileInput,
-} from "@/components/shadcnUI/FileUpload";
+} from "@/components/shadcnUI/fileUpload";
 
 const columns = [
   { accessorKey: "First Name", header: "First Name" },
