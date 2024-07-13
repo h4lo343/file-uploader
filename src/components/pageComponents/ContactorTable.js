@@ -299,6 +299,9 @@ export const ContactorTable = ({ contactorsData }) => {
                           <SelectItem value="South Australia">
                             South Australia
                           </SelectItem>
+                          <SelectItem value="North Territory">
+                            North Territory
+                          </SelectItem>
                         </SelectContent>
                       </Select>
                       <FormMessage />
