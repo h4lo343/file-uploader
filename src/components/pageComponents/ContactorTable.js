@@ -27,19 +27,17 @@ import {
   getCoreRowModel,
   useReactTable,
 } from "@tanstack/react-table";
+import { Toaster } from "sonner";
+import { toast } from "sonner";
 import { Button } from "@/components/shadcnUI/button";
 import {
   Dialog,
   DialogClose,
   DialogContent,
-  DialogDescription,
   DialogFooter,
-  DialogHeader,
-  DialogTitle,
   DialogTrigger,
 } from "@/components/shadcnUI/dialog";
 import { Input } from "@/components/shadcnUI/input";
-import { Label } from "@/components/shadcnUI/label";
 import {
   Select,
   SelectContent,
@@ -52,7 +50,6 @@ import {
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { object, z } from "zod";
-import supabase from "@/lib/supabase";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import {
@@ -102,17 +99,17 @@ const dropZoneConfig = {
     "text/*": [".csv"],
   },
   multiple: true,
-  maxSize: 1024 * 1024 * 49,
   maxFiles: 1,
 };
 export const ContactorTable = ({ contactorsData }) => {
   const router = useRouter();
   const [isForm, setIsForm] = useState(true);
   const handleAddNewContact = async (v) => {
-    console.log(FileForm.getValues("File"));
     await addNewContact(v);
     router.refresh();
     setDialogOpen(false);
+    DataForm.reset();
+    toast.success("Successully added a new contact");
   };
 
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -139,15 +136,20 @@ export const ContactorTable = ({ contactorsData }) => {
     },
   });
   const handleUploadFile = async (v) => {
-    console.log(v.File[0] instanceof File);
     const formData = new FormData();
-
     formData.append("file", v.File[0]);
     const res = await uploadFile(formData);
     if (res.success) {
       router.refresh();
       setDialogOpen(false);
+      toast.success("Successfully uoloaded");
+    } else {
+      router.refresh();
+      setDialogOpen(false);
+      toast.warning("File in wrong format");
     }
+
+    FileForm.resetField("File");
   };
   const FileSvgDraw = () => {
     return (
@@ -178,6 +180,7 @@ export const ContactorTable = ({ contactorsData }) => {
 
   return (
     <div>
+      <Toaster />
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogTrigger asChild>
           <Button className="mb-8">Add New Contact</Button>
