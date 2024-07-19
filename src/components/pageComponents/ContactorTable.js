@@ -7,9 +7,8 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/shadcnUI/table";
-import { cn } from "@/lib/utils";
+import { generateCol, generateTableDefaultVal } from "@/lib/utils";
 import { Paperclip, Send } from "lucide-react";
-import { buttonVariants } from "@/components/shadcnUI/button";
 import validator from "validator";
 import { addNewContact } from "@/lib/serverActions/addNewContact";
 import {
@@ -27,6 +26,7 @@ import {
   getCoreRowModel,
   useReactTable,
 } from "@tanstack/react-table";
+import { EditTable } from "./EditTable";
 import { Toaster } from "sonner";
 import { toast } from "sonner";
 import { Button } from "@/components/shadcnUI/button";
@@ -51,23 +51,17 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { object, z } from "zod";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   FileUploader,
   FileUploaderContent,
   FileUploaderItem,
   FileInput,
+  useFileUpload,
 } from "@/components/shadcnUI/fileUpload";
-import { uploadFile } from "@/lib/serverActions/uploadFile";
+import { getFileData, uploadFile } from "@/lib/serverActions/uploadFile";
+import { DataTable } from "./DataTable";
 
-const columns = [
-  { accessorKey: "First Name", header: "First Name" },
-  { accessorKey: "Last Name", header: "Last Name" },
-  { accessorKey: "Email", header: "Email" },
-  { accessorKey: "Mobile", header: "Mobile" },
-  { accessorKey: "Custom Field", header: "Custom Field" },
-  { accessorKey: "State", header: "State" },
-];
 const DataFormSchema = z.object({
   "First Name": z.string().min(1, {
     message: "Please fill your first name",
@@ -102,33 +96,32 @@ const dropZoneConfig = {
   maxFiles: 1,
 };
 export const ContactorTable = ({ contactorsData }) => {
+  const columns = generateCol(contactorsData?.[0]);
+  const DataForm = useForm({
+    resolver: zodResolver(DataFormSchema),
+    defaultValues: generateTableDefaultVal(columns),
+  });
+  const [formattedData, setFormattedData] = useState(null);
   const router = useRouter();
   const [isForm, setIsForm] = useState(true);
   const handleAddNewContact = async (v) => {
-    await addNewContact(v);
+    await addNewContact([...v]);
     router.refresh();
     setDialogOpen(false);
     DataForm.reset();
     toast.success("Successully added a new contact");
   };
-
+  const [stage, setStage] = useState(1);
+  const [userFileData, setUserFileData] = useState(null);
+  const [next1Dis, setNext1Dis] = useState(true);
+  const [next2Dis, setNext2Dis] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
   const table = useReactTable({
     data: contactorsData,
     columns,
     getCoreRowModel: getCoreRowModel(),
   });
-  const DataForm = useForm({
-    resolver: zodResolver(DataFormSchema),
-    defaultValues: {
-      "First Name": "",
-      "Last Name": "",
-      Email: "",
-      Mobile: "",
-      "Custom Field": "",
-      State: "",
-    },
-  });
+
   const FileForm = useForm({
     resolver: zodResolver(FileFormSchema),
     defaultValues: {
@@ -138,18 +131,19 @@ export const ContactorTable = ({ contactorsData }) => {
   const handleUploadFile = async (v) => {
     const formData = new FormData();
     formData.append("file", v.File[0]);
-    const res = await uploadFile(formData);
-    if (res.success) {
-      router.refresh();
-      setDialogOpen(false);
-      toast.success("Successfully uoloaded");
-    } else {
-      router.refresh();
-      setDialogOpen(false);
-      toast.warning("File in wrong format");
+    const res = await getFileData(formData);
+    if (res.error) {
+      throw error("123");
     }
-
-    FileForm.resetField("File");
+    setUserFileData(res.data);
+    setNext1Dis(false);
+  };
+  const handleSubmit = async () => {
+    await addNewContact(formattedData);
+    router.refresh();
+    setDialogOpen(false);
+    DataForm.reset();
+    toast.success("Successully added uploaded file");
   };
   const FileSvgDraw = () => {
     return (
@@ -186,7 +180,7 @@ export const ContactorTable = ({ contactorsData }) => {
           <Button className="mb-8">Add New Contact</Button>
         </DialogTrigger>
         <DialogContent>
-          <div className="flex pt-1.5">
+          <div className="flex pt-3">
             <Button
               className={`flex-1 rounded-none ${
                 isForm ? "bg-black text-white " : "bg-white text-black"
@@ -330,45 +324,89 @@ export const ContactorTable = ({ contactorsData }) => {
             </Form>
           ) : (
             <>
-              <Form {...FileForm}>
-                <form onSubmit={FileForm.handleSubmit(handleUploadFile)}>
-                  <FormField
-                    control={FileForm.control}
-                    name="File"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FileUploader
-                          value={field.value}
-                          onValueChange={field.onChange}
-                          dropzoneOptions={dropZoneConfig}
-                          reSelect={true}
-                          className="relative bg-background rounded-lg p-2 w-full"
-                        >
-                          <FileInput className=" outline-dashed outline-1 outline-white">
-                            <div className="flex items-center justify-center flex-col pt-3 pb-4 w-full ">
-                              <FileSvgDraw />
-                            </div>
-                          </FileInput>
+              {stage === 1 && (
+                <Form {...FileForm}>
+                  <form onSubmit={FileForm.handleSubmit(handleUploadFile)}>
+                    <FormField
+                      control={FileForm.control}
+                      name="File"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FileUploader
+                            value={field.value}
+                            onValueChange={field.onChange}
+                            dropzoneOptions={dropZoneConfig}
+                            reSelect={true}
+                            className="relative bg-background rounded-lg p-2 w-full"
+                          >
+                            <FileInput className=" outline-dashed outline-1 outline-white">
+                              <div className="flex items-center justify-center flex-col pt-3 pb-4 w-full ">
+                                <FileSvgDraw />
+                              </div>
+                            </FileInput>
 
-                          <FileUploaderContent>
-                            {field.value?.map((file, i) => {
-                              return (
-                                <FileUploaderItem key={i} index={i}>
-                                  <Paperclip className="h-4 w-4 stroke-current" />
-                                  <span>{file.name}</span>
-                                </FileUploaderItem>
-                              );
-                            })}
-                          </FileUploaderContent>
-                        </FileUploader>
+                            <FileUploaderContent>
+                              {field.value?.map((file, i) => {
+                                return (
+                                  <FileUploaderItem key={i} index={i}>
+                                    <Paperclip className="h-4 w-4 stroke-current" />
+                                    <span>{file.name}</span>
+                                  </FileUploaderItem>
+                                );
+                              })}
+                            </FileUploaderContent>
+                          </FileUploader>
 
-                        <FormMessage />
-                      </FormItem>
-                    )}
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <div className="flex justify-between">
+                      <Button type="submit">Upload</Button>
+                      <Button disabled={next1Dis} onClick={() => setStage(2)}>
+                        Next
+                      </Button>
+                    </div>
+                  </form>
+                </Form>
+              )}
+              {stage === 2 && (
+                <>
+                  <EditTable
+                    sampleData={userFileData}
+                    originalCol={columns}
+                    setNext2Dis={setNext2Dis}
+                    setFormattedData={setFormattedData}
                   />
-                  <Button type="submit">Upload</Button>
-                </form>
-              </Form>
+                  <div className="flex justify-between">
+                    <Button
+                      onClick={() => {
+                        setStage(1);
+                      }}
+                    >
+                      Back
+                    </Button>
+                    <Button disabled={next2Dis} onClick={() => setStage(3)}>
+                      Next
+                    </Button>
+                  </div>
+                </>
+              )}
+              {stage === 3 && (
+                <>
+                  <DataTable data={formattedData} />
+                  <div className="flex justify-between">
+                    <Button
+                      onClick={() => {
+                        setStage(2);
+                      }}
+                    >
+                      Back
+                    </Button>
+                    <Button onClick={handleSubmit}>Confirm and Upload</Button>
+                  </div>
+                </>
+              )}
             </>
           )}
 

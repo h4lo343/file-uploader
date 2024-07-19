@@ -19,7 +19,7 @@ export async function getContactorsData() {
 export default async function Home() {
   const contactorsData = await getContactorsData();
   return (
-    <main className="  min-h-screen     p-24">
+    <main className="  min-h-screen  p-24">
       <ContactorTable contactorsData={contactorsData} />
     </main>
   );
