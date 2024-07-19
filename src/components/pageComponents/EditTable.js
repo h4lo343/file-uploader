@@ -24,9 +24,9 @@ import {
 import { useEffect, useState } from "react";
 import { generateCol } from "@/lib/utils";
 
-const optinal_cols = ["Custom Field"];
+const necessary_cols = ["Mobile"];
 
-function checkValid(selectVal, necessaryCols) {
+function checkValid(selectVal) {
   selectVal = selectVal.filter((e) => e);
   if (
     selectVal.reduce((acc, item) => acc.add(item), new Set()).size !==
@@ -34,7 +34,7 @@ function checkValid(selectVal, necessaryCols) {
   )
     return false;
 
-  for (let c of necessaryCols) {
+  for (let c of necessary_cols) {
     const index = selectVal.indexOf(c);
     if (index === -1) return false;
   }
@@ -47,16 +47,14 @@ export const EditTable = ({
   setNext2Dis,
   setFormattedData,
 }) => {
+  const optional_cols = originalCol.map((c) => necessary_cols.indexOf(c) == -1);
   const selectCols = originalCol.map((v) => v.accessorKey);
-  const necessaryCols = selectCols.filter(
-    (c) => optinal_cols.indexOf(c) === -1
-  );
 
   const [selectVal, setSelectVal] = useState(
     new Array(originalCol.length).fill(undefined)
   );
   useEffect(() => {
-    if (checkValid(selectVal, necessaryCols)) {
+    if (checkValid(selectVal)) {
       setNext2Dis(false);
       const temp = [];
       for (let d of sampleData) {
@@ -164,7 +162,7 @@ export const EditTable = ({
       </a>
       <div>
         * Mandatory Columns:
-        {necessaryCols.map((c) => (
+        {necessary_cols.map((c) => (
           <div>{c}</div>
         ))}
       </div>

@@ -129,6 +129,7 @@ export const ContactorTable = ({ contactorsData }) => {
     },
   });
   const handleUploadFile = async (v) => {
+    setNext1Dis(true);
     const formData = new FormData();
     formData.append("file", v.File[0]);
     const res = await getFileData(formData);
