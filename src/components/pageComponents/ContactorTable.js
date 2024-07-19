@@ -116,12 +116,21 @@ export const ContactorTable = ({ contactorsData }) => {
   const [next1Dis, setNext1Dis] = useState(true);
   const [next2Dis, setNext2Dis] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [feedback, setFeedback] = useState(null);
   const table = useReactTable({
     data: contactorsData,
     columns,
     getCoreRowModel: getCoreRowModel(),
   });
-
+  const handleFinish = () => {
+    setFeedback(null);
+    setNext1Dis(true);
+    setNext2Dis(true);
+    setUserFileData(null);
+    setStage(1);
+    FileForm.reset();
+  };
   const FileForm = useForm({
     resolver: zodResolver(FileFormSchema),
     defaultValues: {
@@ -130,21 +139,21 @@ export const ContactorTable = ({ contactorsData }) => {
   });
   const handleUploadFile = async (v) => {
     setNext1Dis(true);
+
     const formData = new FormData();
     formData.append("file", v.File[0]);
     const res = await getFileData(formData);
-    if (res.error) {
-      throw error("123");
-    }
     setUserFileData(res.data);
     setNext1Dis(false);
   };
   const handleSubmit = async () => {
-    await addNewContact(formattedData);
+    setLoading(true);
+    setStage(4);
+    const res = await addNewContact(formattedData);
+    setLoading(false);
+    setFeedback(res);
     router.refresh();
-    setDialogOpen(false);
     DataForm.reset();
-    toast.success("Successully added uploaded file");
   };
   const FileSvgDraw = () => {
     return (
@@ -408,13 +417,42 @@ export const ContactorTable = ({ contactorsData }) => {
                   </div>
                 </>
               )}
+              {stage === 4 &&
+                (loading ? (
+                  <div>
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      width="24"
+                      height="24"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      className={"animate-spin"}
+                    >
+                      <path d="M21 12a9 9 0 1 1-6.219-8.56" />
+                    </svg>
+                  </div>
+                ) : (
+                  <div>
+                    <div>Total contacts: {feedback?.total}</div>
+                    <div>Upload successfully: {feedback?.sucessful.length}</div>
+                    <div>Upload failed: {feedback?.failed.length}</div>
+                  </div>
+                ))}
             </>
           )}
 
           <DialogFooter className="sm:justify-start">
             <DialogClose asChild>
-              <Button type="button" variant="secondary">
-                Cancel
+              <Button
+                type="button"
+                variant="secondary"
+                onClick={stage === 4 ? handleFinish : () => {}}
+              >
+                {stage === 4 ? "Finish and Close" : "Cancel"}
               </Button>
             </DialogClose>
           </DialogFooter>

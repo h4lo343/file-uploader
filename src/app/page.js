@@ -7,7 +7,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/shadcnUI/table";
-
+import { cn } from "@/lib/utils";
 import supabase from "@/lib/supabase";
 
 export const revalidate = 0;
