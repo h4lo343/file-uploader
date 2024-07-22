@@ -127,9 +127,11 @@ export const ContactorTable = ({ contactorsData }) => {
   const [next1Dis, setNext1Dis] = useState(true);
   const [next2Dis, setNext2Dis] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [mapping, setMapping] = useState({});
   const [loading, setLoading] = useState(false);
   const [feedback, setFeedback] = useState(null);
   const [selectVal, setSelectVal] = useState([]);
+  const [fileData, setFileData] = useState(null);
   const table = useReactTable({
     data: contactorsData,
     columns,
@@ -143,6 +145,8 @@ export const ContactorTable = ({ contactorsData }) => {
     setStage(1);
     FileForm.reset();
     setSelectVal([]);
+    setFileData(null);
+    setMapping({});
   };
   const FileForm = useForm({
     resolver: zodResolver(FileFormSchema),
@@ -152,18 +156,17 @@ export const ContactorTable = ({ contactorsData }) => {
   });
   const handleUploadFile = async (v) => {
     setNext1Dis(true);
-
     const formData = new FormData();
     formData.append("file", v.File[0]);
+    setFileData(formData);
     const res = await getFileData(formData);
     setUserFileData(res.data);
     setNext1Dis(false);
   };
   const handleSubmit = async () => {
-    console.log(123);
     setLoading(true);
     setStage(4);
-    const res = await addNewContact(formattedData);
+    const res = await uploadFile(fileData, mapping);
     setLoading(false);
     setFeedback(res);
     router.refresh();
@@ -398,6 +401,7 @@ export const ContactorTable = ({ contactorsData }) => {
                 <>
                   <EditTable
                     router={router}
+                    setMapping={setMapping}
                     sampleData={userFileData}
                     originalCol={columns}
                     setNext2Dis={setNext2Dis}
