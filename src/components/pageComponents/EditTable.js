@@ -47,8 +47,10 @@ export const EditTable = ({
   setNext2Dis,
   setFormattedData,
   selectVal,
+  router,
   setSelectVal,
 }) => {
+  console.log(selectVal);
   const selectCols = originalCol.map((v) => v.accessorKey);
   const sampleCol = Object.keys(sampleData[0]);
   useEffect(() => {
@@ -64,10 +66,6 @@ export const EditTable = ({
         }
         temp.push(row);
       }
-      console.log(selectCols);
-      console.log(selectVal);
-      console.log(sampleData);
-      console.log(temp, "temp");
       setFormattedData(temp);
     } else setNext2Dis(true);
   }, [selectVal]);
@@ -156,7 +154,7 @@ export const EditTable = ({
       <a
         className="underline text-blue-500 cursor-pointer"
         onClick={() => {
-          setSelectVal(new Array(originalCol.length).fill(null));
+          setSelectVal(new Array(sampleCol.length).fill(""));
         }}
       >
         clear selectors

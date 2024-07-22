@@ -131,7 +131,7 @@ export const ContactorTable = ({ contactorsData }) => {
     setUserFileData(null);
     setStage(1);
     FileForm.reset();
-    setSelectVal([]);
+    // setSelectVal([]);
   };
   const FileForm = useForm({
     resolver: zodResolver(FileFormSchema),
@@ -385,6 +385,7 @@ export const ContactorTable = ({ contactorsData }) => {
               {stage === 2 && (
                 <>
                   <EditTable
+                    router={router}
                     sampleData={userFileData}
                     originalCol={columns}
                     setNext2Dis={setNext2Dis}
