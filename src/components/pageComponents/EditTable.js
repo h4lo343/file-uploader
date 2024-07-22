@@ -50,21 +50,24 @@ export const EditTable = ({
   setSelectVal,
 }) => {
   const selectCols = originalCol.map((v) => v.accessorKey);
-
+  const sampleCol = Object.keys(sampleData[0]);
   useEffect(() => {
     if (checkValid(selectVal)) {
       setNext2Dis(false);
       const temp = [];
       for (let d of sampleData) {
         const row = {};
-        for (let i = 0; i < selectCols.length; i++) {
+        for (let i = 0; i < selectVal.length; i++) {
           if (!selectVal[i]) continue;
-          const oldData = d[selectCols[i]];
+          const oldData = d[sampleCol[i]];
           row[selectVal[i]] = oldData;
         }
-        console.log(temp);
         temp.push(row);
       }
+      console.log(selectCols);
+      console.log(selectVal);
+      console.log(sampleData);
+      console.log(temp, "temp");
       setFormattedData(temp);
     } else setNext2Dis(true);
   }, [selectVal]);

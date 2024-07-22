@@ -18,6 +18,7 @@ import { generateCol } from "@/lib/utils";
 
 export const DataTable = ({ data }) => {
   const columns = generateCol(data[0]);
+
   const table = useReactTable({
     data: data,
     columns,

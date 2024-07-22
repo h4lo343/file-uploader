@@ -118,9 +118,7 @@ export const ContactorTable = ({ contactorsData }) => {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [feedback, setFeedback] = useState(null);
-  const [selectVal, setSelectVal] = useState(
-    new Array(columns.length).fill(undefined)
-  );
+  const [selectVal, setSelectVal] = useState([]);
   const table = useReactTable({
     data: contactorsData,
     columns,
@@ -133,7 +131,7 @@ export const ContactorTable = ({ contactorsData }) => {
     setUserFileData(null);
     setStage(1);
     FileForm.reset();
-    setSelectVal(new Array(columns.length).fill(undefined));
+    setSelectVal([]);
   };
   const FileForm = useForm({
     resolver: zodResolver(FileFormSchema),
