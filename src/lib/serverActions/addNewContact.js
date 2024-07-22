@@ -1,8 +1,8 @@
 "use server";
 import supabase from "@/lib/supabase";
 
-const validPhoneNumregex = /^(0\d{9}|61\d{9})$/;
-
+const validPhoneNumregex = /^(04\d{8}|4\d{8})$/;
+const phoneNumberNeedTruncation = /^04\d{8}$/;
 export async function addNewContact(newContact) {
   let failed = [];
   let sucessful = [];
@@ -12,6 +12,9 @@ export async function addNewContact(newContact) {
     if (!testResult) {
       failed.push(c);
     } else {
+      if (phoneNumberNeedTruncation.test(mobileNum)) {
+        c.Mobile = c.Mobile.slice(1, c.Mobile.length);
+      }
       sucessful.push(c);
     }
   }
