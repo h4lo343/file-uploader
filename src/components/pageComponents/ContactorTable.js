@@ -10,6 +10,17 @@ import {
 import { generateCol, generateTableDefaultVal } from "@/lib/utils";
 import { Paperclip, Send } from "lucide-react";
 import validator from "validator";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/shadcnUI/alert-dialog";
 import { addNewContact } from "@/lib/serverActions/addNewContact";
 import {
   Form,
@@ -131,7 +142,7 @@ export const ContactorTable = ({ contactorsData }) => {
     setUserFileData(null);
     setStage(1);
     FileForm.reset();
-    // setSelectVal([]);
+    setSelectVal([]);
   };
   const FileForm = useForm({
     resolver: zodResolver(FileFormSchema),
@@ -149,6 +160,7 @@ export const ContactorTable = ({ contactorsData }) => {
     setNext1Dis(false);
   };
   const handleSubmit = async () => {
+    console.log(123);
     setLoading(true);
     setStage(4);
     const res = await addNewContact(formattedData);
@@ -451,15 +463,30 @@ export const ContactorTable = ({ contactorsData }) => {
           )}
 
           <DialogFooter className="sm:justify-start">
-            <DialogClose asChild>
-              <Button
-                type="button"
-                variant="secondary"
-                onClick={stage === 4 ? handleFinish : () => {}}
-              >
-                {stage === 4 ? "Finish and Close" : "Cancel"}
-              </Button>
-            </DialogClose>
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <Button type="button" variant="secondary">
+                  {stage === 4 ? "Finish and Close" : "Cancel"}
+                </Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Are you sure to cancel?</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    This action cannot be undone. You will lose your current
+                    editing data
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                  <DialogClose asChild>
+                    <AlertDialogAction onClick={handleFinish}>
+                      Continue
+                    </AlertDialogAction>
+                  </DialogClose>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
           </DialogFooter>
         </DialogContent>
       </Dialog>
