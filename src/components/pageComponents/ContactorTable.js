@@ -118,6 +118,9 @@ export const ContactorTable = ({ contactorsData }) => {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [feedback, setFeedback] = useState(null);
+  const [selectVal, setSelectVal] = useState(
+    new Array(columns.length).fill(undefined)
+  );
   const table = useReactTable({
     data: contactorsData,
     columns,
@@ -130,6 +133,7 @@ export const ContactorTable = ({ contactorsData }) => {
     setUserFileData(null);
     setStage(1);
     FileForm.reset();
+    setSelectVal(new Array(columns.length).fill(undefined));
   };
   const FileForm = useForm({
     resolver: zodResolver(FileFormSchema),
@@ -387,6 +391,8 @@ export const ContactorTable = ({ contactorsData }) => {
                     originalCol={columns}
                     setNext2Dis={setNext2Dis}
                     setFormattedData={setFormattedData}
+                    selectVal={selectVal}
+                    setSelectVal={setSelectVal}
                   />
                   <div className="flex justify-between">
                     <Button

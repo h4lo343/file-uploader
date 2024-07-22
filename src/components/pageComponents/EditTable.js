@@ -46,13 +46,11 @@ export const EditTable = ({
   originalCol,
   setNext2Dis,
   setFormattedData,
+  selectVal,
+  setSelectVal,
 }) => {
-  const optional_cols = originalCol.map((c) => necessary_cols.indexOf(c) == -1);
   const selectCols = originalCol.map((v) => v.accessorKey);
 
-  const [selectVal, setSelectVal] = useState(
-    new Array(originalCol.length).fill(undefined)
-  );
   useEffect(() => {
     if (checkValid(selectVal)) {
       setNext2Dis(false);
