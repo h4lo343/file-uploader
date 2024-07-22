@@ -461,33 +461,46 @@ export const ContactorTable = ({ contactorsData }) => {
                 ))}
             </>
           )}
-
-          <DialogFooter className="sm:justify-start">
-            <AlertDialog>
-              <AlertDialogTrigger asChild>
-                <Button type="button" variant="secondary">
-                  {stage === 4 ? "Finish and Close" : "Cancel"}
+          {stage === 4 ? (
+            <DialogFooter>
+              <DialogClose asChild>
+                <Button
+                  type="button"
+                  variant="secondary"
+                  onClick={handleFinish}
+                >
+                  Finish and close
                 </Button>
-              </AlertDialogTrigger>
-              <AlertDialogContent>
-                <AlertDialogHeader>
-                  <AlertDialogTitle>Are you sure to cancel?</AlertDialogTitle>
-                  <AlertDialogDescription>
-                    This action cannot be undone. You will lose your current
-                    editing data
-                  </AlertDialogDescription>
-                </AlertDialogHeader>
-                <AlertDialogFooter>
-                  <AlertDialogCancel>Cancel</AlertDialogCancel>
-                  <DialogClose asChild>
-                    <AlertDialogAction onClick={handleFinish}>
-                      Continue
-                    </AlertDialogAction>
-                  </DialogClose>
-                </AlertDialogFooter>
-              </AlertDialogContent>
-            </AlertDialog>
-          </DialogFooter>
+              </DialogClose>
+            </DialogFooter>
+          ) : (
+            <DialogFooter className="sm:justify-start">
+              <AlertDialog>
+                <AlertDialogTrigger asChild>
+                  <Button type="button" variant="secondary">
+                    {stage === 4 ? "Finish and Close" : "Cancel"}
+                  </Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>Are you sure to cancel?</AlertDialogTitle>
+                    <AlertDialogDescription>
+                      This action cannot be undone. You will lose your current
+                      editing data
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                    <DialogClose asChild>
+                      <AlertDialogAction onClick={handleFinish}>
+                        Continue
+                      </AlertDialogAction>
+                    </DialogClose>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
+            </DialogFooter>
+          )}
         </DialogContent>
       </Dialog>
 
