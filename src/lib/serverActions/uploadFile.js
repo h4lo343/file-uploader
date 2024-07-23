@@ -15,7 +15,9 @@ async function getCSVObj(formData) {
       stream
         .pipe(csvParser())
         .on("data", (data) => {
-          result.push(data);
+          if (Object.values(data).some((field) => field.trim() !== "")) {
+            result.push(data);
+          }
         })
         .on("finish", () => res());
     });
@@ -37,6 +39,7 @@ export async function getFileData(formData) {
 
 export async function uploadFile(formData, mapping) {
   let csvObj = await getCSVObj(formData);
+
   const formattedData = [];
   for (let d of csvObj) {
     const temp = {};
@@ -46,6 +49,8 @@ export async function uploadFile(formData, mapping) {
     }
     formattedData.push(temp);
   }
+  console.log(formattedData);
+  console.log(formattedData.slice(100, -1));
   const response = addNewContact(formattedData);
   return response;
 }
