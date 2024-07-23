@@ -1,23 +1,36 @@
 "use server";
 import supabase from "@/lib/supabase";
 
-const validPhoneNumregex = /^(04\d{8}|4\d{8}|61\d{9})$/;
+const validMobileNumregex = /^(04\d{8}|4\d{8}|61\d{9})$/;
 
 const zeroFour = /^04\d{8}$/;
 const sixOne = /^61\d{9}$/;
 
-export async function addNewContact(newContact) {
+function checkMobileNumber(mobileNum) {
+  if (!validMobileNumregex.test(mobileNum)) return false;
+  else if (zeroFour.test(mobileNum)) {
+    return "04";
+  } else if (sixOne.test(mobileNum)) {
+    return "61";
+  } else return true;
+}
+
+export async function addNewContact(newContact, csvObj = []) {
   let failed = [];
   let sucessful = [];
-  for (let c of newContact) {
+  let failedData = [];
+
+  for (let i = 0; i < newContact.length; i++) {
+    const c = newContact[i];
     let mobileNum = c.Mobile;
-    const testResult = validPhoneNumregex.test(mobileNum);
-    if (!testResult) {
-      failed.push(c);
+    const checkResult = checkMobileNumber(mobileNum);
+
+    if (!checkResult || !mobileNum) {
+      failed.push(csvObj[i]);
     } else {
-      if (zeroFour.test(mobileNum)) {
+      if (checkResult === "04") {
         c.Mobile = c.Mobile.slice(1, c.Mobile.length);
-      } else if (sixOne.test(mobileNum)) {
+      } else if (checkResult === "61") {
         c.Mobile = c.Mobile.slice(2, c.Mobile.length);
       }
       sucessful.push(c);

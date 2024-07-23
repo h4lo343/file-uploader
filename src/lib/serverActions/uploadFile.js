@@ -49,6 +49,7 @@ export async function uploadFile(formData, mapping) {
     }
     formattedData.push(temp);
   }
-  const response = addNewContact(formattedData);
+  console.log(csvObj, 123);
+  const response = addNewContact(formattedData, csvObj);
   return response;
 }

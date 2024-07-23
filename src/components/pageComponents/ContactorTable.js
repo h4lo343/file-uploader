@@ -72,6 +72,7 @@ import {
 } from "@/components/shadcnUI/fileUpload";
 import { getFileData, uploadFile } from "@/lib/serverActions/uploadFile";
 import { DataTable } from "./DataTable";
+import { CsvDownloadButton } from "./CsvDownloadButton";
 
 const DataFormSchema = z.object({
   "First Name": z.string().min(1, {
@@ -461,6 +462,7 @@ export const ContactorTable = ({ contactorsData }) => {
                     <div>Total contacts: {feedback?.total}</div>
                     <div>Upload successfully: {feedback?.sucessful.length}</div>
                     <div>Upload failed: {feedback?.failed.length}</div>
+                    <CsvDownloadButton failedData={feedback?.failed} />
                   </div>
                 ))}
             </>
