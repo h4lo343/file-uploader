@@ -462,6 +462,7 @@ export const ContactorTable = ({ contactorsData }) => {
                     <div>Total contacts: {feedback?.total}</div>
                     <div>Upload successfully: {feedback?.sucessful.length}</div>
                     <div>Upload failed: {feedback?.failed.length}</div>
+
                     <CsvDownloadButton failedData={feedback?.failed} />
                   </div>
                 ))}

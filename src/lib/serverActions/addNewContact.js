@@ -18,7 +18,6 @@ function checkMobileNumber(mobileNum) {
 export async function addNewContact(newContact, csvObj = []) {
   let failed = [];
   let sucessful = [];
-  let failedData = [];
 
   for (let i = 0; i < newContact.length; i++) {
     const c = newContact[i];
@@ -36,6 +35,7 @@ export async function addNewContact(newContact, csvObj = []) {
       sucessful.push(c);
     }
   }
+
   const { data, error } = await supabase.from("customers").insert(sucessful);
   return {
     total: newContact.length,
