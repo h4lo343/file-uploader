@@ -49,8 +49,6 @@ export async function uploadFile(formData, mapping) {
     }
     formattedData.push(temp);
   }
-  console.log(formattedData);
-  console.log(formattedData.slice(100, -1));
   const response = addNewContact(formattedData);
   return response;
 }
